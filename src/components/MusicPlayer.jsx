@@ -41,7 +41,6 @@ const MusicPlayer = () => {
         preload="auto"
       >
         <source src="/happy-birthday.mp3" type="audio/mpeg" />
-        <source src="/happy-birthday.ogg" type="audio/ogg" />
       </audio>
 
       <motion.div

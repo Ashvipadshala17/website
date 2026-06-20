@@ -16,9 +16,15 @@ const BirthdayCake = ({ onBlowCandles, onCutCake, candlesBlown, cakeCut, onNext 
       colors: ['#ec4899', '#8b5cf6', '#fbbf24', '#f472b6'],
     })
     
-    // Play celebration sound
-    const audio = new Audio('/celebration.mp3')
-    audio.play().catch(console.error)
+    // Play celebration sound (optional)
+    try {
+      const audio = new Audio('/celebration.mp3')
+      audio.play().catch(() => {
+        // Celebration sound not available, continue without it
+      })
+    } catch (error) {
+      // Celebration sound not available, continue without it
+    }
     
     setTimeout(() => setShowMessage(true), 500)
   }

@@ -6,37 +6,38 @@ const PhotoGallery = ({ onNext }) => {
   const [images, setImages] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedImage, setSelectedImage] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Load images from public/images folder
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
-    const loadedImages = []
-    
-    // Try to load common image names
-    const commonNames = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
-    
-    commonNames.forEach((name, index) => {
-      imageExtensions.forEach(ext => {
-        const img = new Image()
-        img.src = `/images/${name}.${ext}`
-        img.onload = () => {
-          if (!loadedImages.find(i => i.id === index)) {
-            setImages(prev => [...prev, { id: index, src: `/images/${name}.${ext}` }])
+    const loadImages = async () => {
+      const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+      const loadedImages = []
+      
+      // Try to load common image names (1-20)
+      for (let i = 1; i <= 20; i++) {
+        for (const ext of imageExtensions) {
+          const imagePath = `/images/${i}.${ext}`
+          try {
+            const response = await fetch(imagePath, { method: 'HEAD' })
+            if (response.ok) {
+              loadedImages.push({ id: i, src: imagePath })
+              break // Found this image, move to next number
+            }
+          } catch (error) {
+            // Image doesn't exist, try next extension
+            continue
           }
         }
-      })
-    })
-
-    // If no images found, add placeholder
-    setTimeout(() => {
-      if (loadedImages.length === 0) {
-        setImages([
-          { id: 1, src: '/images/placeholder1.jpg' },
-          { id: 2, src: '/images/placeholder2.jpg' },
-          { id: 3, src: '/images/placeholder3.jpg' },
-        ])
       }
-    }, 1000)
+      
+      if (loadedImages.length > 0) {
+        setImages(loadedImages)
+      }
+      setLoading(false)
+    }
+    
+    loadImages()
   }, [])
 
   const nextImage = () => {
@@ -67,7 +68,16 @@ const PhotoGallery = ({ onNext }) => {
       </motion.div>
 
       {/* Gallery */}
-      {images.length > 0 ? (
+      {loading ? (
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <p className="text-pink-700 text-lg">Loading memories...</p>
+        </motion.div>
+      ) : images.length > 0 ? (
         <motion.div
           className="relative w-full max-w-4xl mx-auto"
           initial={{ opacity: 0, scale: 0.9 }}
