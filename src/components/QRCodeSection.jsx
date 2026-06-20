@@ -26,13 +26,19 @@ const QRCodeSection = () => {
       const qrElement = qrRef.current
       
       if (qrElement) {
+        // Get the SVG element
+        const svgElement = qrElement.querySelector('svg')
+        if (!svgElement) {
+          throw new Error('SVG element not found')
+        }
+        
         // Get the SVG data
-        const svgData = new XMLSerializer().serializeToString(qrElement.querySelector('svg'))
+        const svgData = new XMLSerializer().serializeToString(svgElement)
         
         // Create an image from the SVG
         const img = new Image()
         const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
-        const url = URL.createObjectURL(svgBlob)
+        const blobUrl = URL.createObjectURL(svgBlob)
         
         img.onload = () => {
           // Set canvas size (higher resolution for better quality)
@@ -45,17 +51,30 @@ const QRCodeSection = () => {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
           
           // Convert to PNG and download
-          const pngUrl = canvas.toDataURL('image/png')
-          const downloadLink = document.createElement('a')
-          downloadLink.download = 'moxa-birthday-qr.png'
-          downloadLink.href = pngUrl
-          document.body.appendChild(downloadLink)
-          downloadLink.click()
-          document.body.removeChild(downloadLink)
-          URL.revokeObjectURL(url)
+          try {
+            const pngUrl = canvas.toDataURL('image/png')
+            const downloadLink = document.createElement('a')
+            downloadLink.download = 'moxa-birthday-qr.png'
+            downloadLink.href = pngUrl
+            document.body.appendChild(downloadLink)
+            downloadLink.click()
+            document.body.removeChild(downloadLink)
+            URL.revokeObjectURL(blobUrl)
+          } catch (downloadError) {
+            console.error('Error creating download:', downloadError)
+            alert('Failed to create download. Please try again.')
+          }
         }
         
-        img.src = url
+        img.onerror = () => {
+          console.error('Error loading SVG as image')
+          URL.revokeObjectURL(blobUrl)
+          alert('Failed to generate QR code image. Please try again.')
+        }
+        
+        img.src = blobUrl
+      } else {
+        throw new Error('QR element not found')
       }
     } catch (error) {
       console.error('Error downloading QR code:', error)

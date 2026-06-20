@@ -45,7 +45,10 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
       {!isOpened && (
-        <LandingPage onOpen={handleOpenSurprise} />
+        <>
+          <LandingPage onOpen={handleOpenSurprise} />
+          <QRCodeSection />
+        </>
       )}
       
       {isOpened && (
@@ -81,8 +84,6 @@ function App() {
               <FinalSurprise key="final" />
             )}
           </AnimatePresence>
-
-          <QRCodeSection />
         </>
       )}
     </div>

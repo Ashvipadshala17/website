@@ -49,18 +49,18 @@ const MusicPlayer = () => {
         animate={{ scale: 1 }}
         transition={{ delay: 0.5, type: 'spring' }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <motion.button
             onClick={togglePlay}
-            className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
+            className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-lg hover:scale-110 transition-transform"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            {isPlaying ? <FaPause size={20} /> : <FaPlay size={20} />}
+            {isPlaying ? <FaPause size={16} /> : <FaPlay size={16} />}
           </motion.button>
 
-          <div className="flex items-center gap-2">
-            <FaMusic className="text-pink-600" size={16} />
+          <div className="flex items-center gap-1 md:gap-2">
+            <FaMusic className="text-pink-600" size={14} />
             <input
               type="range"
               min="0"
@@ -68,12 +68,12 @@ const MusicPlayer = () => {
               step="0.1"
               value={volume}
               onChange={handleVolumeChange}
-              className="w-20 h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer accent-pink-600"
+              className="w-16 md:w-20 h-2 bg-pink-200 rounded-lg appearance-none cursor-pointer accent-pink-600"
             />
             {volume > 0.5 ? (
-              <FaVolumeUp className="text-pink-600" size={16} />
+              <FaVolumeUp className="text-pink-600" size={14} />
             ) : (
-              <FaVolumeDown className="text-pink-600" size={16} />
+              <FaVolumeDown className="text-pink-600" size={14} />
             )}
           </div>
         </div>

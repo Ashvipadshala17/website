@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence, useAnimation } from 'framer-motion'
 import { FaHeart, FaArrowLeft, FaArrowRight, FaChevronDown } from 'react-icons/fa'
 
 const PhotoGallery = ({ onNext }) => {
@@ -7,6 +7,9 @@ const PhotoGallery = ({ onNext }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedImage, setSelectedImage] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
+  const containerRef = useRef(null)
 
   useEffect(() => {
     // Load images from public/images folder
@@ -40,6 +43,16 @@ const PhotoGallery = ({ onNext }) => {
     loadImages()
   }, [])
 
+  // Auto-slide every 5 seconds
+  useEffect(() => {
+    if (!loading && images.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % images.length)
+      }, 5000)
+      return () => clearInterval(interval)
+    }
+  }, [loading, images.length])
+
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length)
   }
@@ -50,6 +63,29 @@ const PhotoGallery = ({ onNext }) => {
 
   const handleImageClick = (image) => {
     setSelectedImage(image)
+  }
+
+  // Touch handlers for swipe
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+    
+    if (isLeftSwipe) {
+      nextImage()
+    } else if (isRightSwipe) {
+      prevImage()
+    }
   }
 
   return (
@@ -85,17 +121,24 @@ const PhotoGallery = ({ onNext }) => {
           transition={{ duration: 0.5 }}
         >
           {/* Main Image with Heart Frame */}
-          <div className="relative aspect-square md:aspect-video max-h-[60vh] flex items-center justify-center">
+          <div 
+            className="relative aspect-square md:aspect-video max-h-[60vh] flex items-center justify-center"
+            ref={containerRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <motion.div
               className="relative w-full h-full flex items-center justify-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               key={currentIndex}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.5 }}
             >
               {/* Heart-shaped frame */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="relative w-full h-full max-w-[500px] max-h-[500px]">
+                <div className="relative w-full h-full max-w-[400px] max-h-[400px] md:max-w-[500px] md:max-h-[500px]">
                   <svg
                     viewBox="0 0 100 100"
                     className="w-full h-full drop-shadow-2xl"
@@ -109,9 +152,10 @@ const PhotoGallery = ({ onNext }) => {
                   <img
                     src={images[currentIndex]?.src}
                     alt={`Memory ${currentIndex + 1}`}
-                    className="absolute inset-0 w-full h-full object-cover rounded-full"
+                    className="absolute inset-0 w-full h-full object-cover"
                     style={{
                       clipPath: 'path("M50 88.9C50 88.9 10 55 10 30C10 15 20 5 35 5C42.5 5 50 10 50 15C50 10 57.5 5 65 5C80 5 90 15 90 30C90 55 50 88.9 50 88.9Z")',
+                      objectPosition: 'center',
                     }}
                     onClick={() => handleImageClick(images[currentIndex])}
                   />
@@ -122,15 +166,15 @@ const PhotoGallery = ({ onNext }) => {
             {/* Navigation Arrows */}
             <button
               onClick={prevImage}
-              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-pink-600 shadow-lg hover:bg-pink-100 transition-colors z-10"
+              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-pink-600 shadow-lg hover:bg-pink-100 transition-colors z-10"
             >
-              <FaArrowLeft size={24} />
+              <FaArrowLeft size={20} />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-pink-600 shadow-lg hover:bg-pink-100 transition-colors z-10"
+              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-pink-600 shadow-lg hover:bg-pink-100 transition-colors z-10"
             >
-              <FaArrowRight size={24} />
+              <FaArrowRight size={20} />
             </button>
           </div>
 
